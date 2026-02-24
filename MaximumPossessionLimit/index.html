@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>所持上限 理論値表</title>
+<style>
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background:#f5f5f5;
+  font-size:12px;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background:#ffffff;
+  padding:8px;
+  border-bottom:1px solid #ccc;
+  display:flex;
+  gap:6px;
+  align-items:center;
+  z-index:10;
+}
+
+input {
+  font-size:14px;
+  padding:4px;
+  width:90px;
+}
+
+button {
+  padding:4px 8px;
+  font-size:12px;
+}
+
+.totalBox {
+  margin-left:auto;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+table {
+  border-collapse: collapse;
+  width:100%;
+  background:#fff;
+}
+
+th, td {
+  border:1px solid #999;
+  padding:3px 4px;
+  text-align:right;
+  white-space:nowrap;
+}
+
+th {
+  background:#eee;
+  position: sticky;
+  top:42px;
+  z-index:5;
+}
+
+td.name {
+  text-align:left;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  流転:
+  <input type="number" id="ruten" placeholder="0" min="0" max="100000">
+  <button onclick="calc()">計算</button>
+  <div class="totalBox">合計: <span id="total">0</span></div>
+</div>
+
+<table id="result">
+<thead>
+<tr>
+<th>項目</th>
+<th>基礎</th>
+<th>倉庫</th>
+<th>増加</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+const items = [
+  {name:"初期所持上限", base:1000, type:"initial"},
+  {name:"流転スキル所持上限", base:100, type:"rutenSkill"},
+
+  {name:"倉庫の欠片I", base:1000, type:"kakera"},
+  {name:"倉庫の欠片II", base:1500, type:"kakera"},
+  {name:"倉庫の欠片III", base:2000, type:"kakera"},
+  {name:"倉庫の欠片IV", base:2500, type:"kakera"},
+  {name:"倉庫の欠片V", base:3000, type:"kakera"},
+  {name:"倉庫の欠片VI", base:3500, type:"kakera"},
+  {name:"倉庫の欠片VII", base:4000, type:"kakera"},
+  {name:"倉庫の欠片VIII", base:4500, type:"kakera"},
+  {name:"倉庫の欠片IX", base:5000, type:"kakera"},
+  {name:"倉庫の欠片X", base:5500, type:"kakera"},
+
+  {name:"倉庫のオーブI", base:10000, type:"orb"},
+  {name:"倉庫のオーブII", base:10000, type:"orb"},
+  {name:"倉庫のオーブIII", base:10000, type:"orb"},
+  {name:"倉庫のオーブIV", base:10000, type:"orb"},
+
+  {name:"倉庫の欠片I*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片II*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片III*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片IV*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片V*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片VI*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片VII*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片VIII*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片IX*", base:5000, type:"kakera"},
+  {name:"倉庫の欠片X*", base:5000, type:"kakera"},
+
+  {name:"倉庫のオーブI*", base:5000, type:"orb"},
+  {name:"倉庫のオーブII*", base:5000, type:"orb"},
+  {name:"倉庫のオーブIII*", base:5000, type:"orb"},
+  {name:"倉庫のオーブIV*", base:5000, type:"orb"},
+  {name:"倉庫のオーブV*", base:5000, type:"orb"}
+];
+
+function calc() {
+  let ruten = Math.floor(Number(document.getElementById("ruten").value) || 0);
+  if (ruten > 100000) ruten = 100000;
+  if (ruten < 0) ruten = 0;
+
+  let tbody = "";
+  let total = 0;
+
+  items.forEach(item => {
+    let warehouse = "-";
+    let increase = 0;
+
+    if (item.type === "initial") {
+      increase = 1000;
+      total += increase;
+    }
+
+    else if (item.type === "rutenSkill") {
+      warehouse = 110;
+      increase = item.base * warehouse;
+      total += increase;
+    }
+
+    else if (item.type === "kakera") {
+      warehouse = Math.floor(item.base + ruten / 10);
+      increase = warehouse;
+      total += increase;
+    }
+
+    else if (item.type === "orb") {
+      warehouse = Math.floor(item.base + ruten / 10);
+      increase = warehouse * 3;
+      total += increase;
+    }
+
+    tbody += `
+      <tr>
+        <td class="name">${item.name}</td>
+        <td>${item.base}</td>
+        <td>${warehouse}</td>
+        <td>${increase.toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  document.querySelector("#result tbody").innerHTML = tbody;
+  document.getElementById("total").textContent = total.toLocaleString();
+}
+
+calc();
+</script>
+
+</body>
+</html>
