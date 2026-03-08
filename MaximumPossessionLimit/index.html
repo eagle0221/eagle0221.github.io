@@ -3,48 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>所持上限 理論値表</title>
+<title>所持上限 理論値</title>
 <style>
 body {
   font-family: sans-serif;
   margin: 0;
   background:#f5f5f5;
-  font-size:12px;
+  font-size:14px;
 }
 
 .header {
   position: sticky;
   top: 0;
   background:#ffffff;
-  padding:8px;
+  padding:10px;
   border-bottom:1px solid #ccc;
   display:flex;
-  gap:6px;
+  flex-wrap:wrap;
+  gap:8px;
   align-items:center;
   z-index:10;
 }
 
 input {
-  font-size:14px;
-  padding:4px;
-  width:90px;
+  font-size:16px;
+  padding:6px;
+  width:100px;
 }
 
 button {
-  padding:4px 8px;
-  font-size:12px;
+  padding:6px 10px;
+  font-size:14px;
 }
 
 .totalBox {
-  margin-left:auto;
   font-weight:bold;
+  margin-left:auto;
   white-space:nowrap;
+}
+
+.toggleBtn {
+  width:100%;
+}
+
+.tableWrap {
+  display:none;
 }
 
 table {
   border-collapse: collapse;
   width:100%;
   background:#fff;
+  font-size:12px;
 }
 
 th, td {
@@ -57,7 +67,7 @@ th, td {
 th {
   background:#eee;
   position: sticky;
-  top:42px;
+  top:48px;
   z-index:5;
 }
 
@@ -70,11 +80,12 @@ td.name {
 
 <div class="header">
   流転:
-  <input type="number" id="ruten" placeholder="0" min="0" max="100000">
-  <button onclick="calc()">計算</button>
-  <div class="totalBox">合計: <span id="total">0</span></div>
+  <input type="number" id="ruten" placeholder="0" min="0" max="100000" oninput="calc()">
+  <div class="totalBox">所持上限: <span id="total">0</span></div>
+  <button class="toggleBtn" onclick="toggleTable()">内訳を表示</button>
 </div>
 
+<div class="tableWrap" id="tableWrap">
 <table id="result">
 <thead>
 <tr>
@@ -86,6 +97,7 @@ td.name {
 </thead>
 <tbody></tbody>
 </table>
+</div>
 
 <script>
 const items = [
@@ -142,19 +154,16 @@ function calc() {
       increase = 1000;
       total += increase;
     }
-
     else if (item.type === "rutenSkill") {
       warehouse = 110;
       increase = item.base * warehouse;
       total += increase;
     }
-
     else if (item.type === "kakera") {
       warehouse = Math.floor(item.base + ruten / 10);
       increase = warehouse;
       total += increase;
     }
-
     else if (item.type === "orb") {
       warehouse = Math.floor(item.base + ruten / 10);
       increase = warehouse * 3;
@@ -173,6 +182,19 @@ function calc() {
 
   document.querySelector("#result tbody").innerHTML = tbody;
   document.getElementById("total").textContent = total.toLocaleString();
+}
+
+function toggleTable() {
+  const wrap = document.getElementById("tableWrap");
+  const btn = document.querySelector(".toggleBtn");
+
+  if (wrap.style.display === "none" || wrap.style.display === "") {
+    wrap.style.display = "block";
+    btn.textContent = "内訳を非表示";
+  } else {
+    wrap.style.display = "none";
+    btn.textContent = "内訳を表示";
+  }
 }
 
 calc();
