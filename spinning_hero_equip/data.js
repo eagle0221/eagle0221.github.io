@@ -2,6 +2,22 @@
 const enchantRedList = Array.from({length:53}, (_,i)=>"赤エンチャ"+(i+1));
 const enchantBlueList = Array.from({length:45}, (_,i)=>"青エンチャ"+(i+1));
 
+// 武器
+const weaponList = [
+  "赤の剣",
+  "青の剣",
+  "闇の大剣",
+  "光の槍",
+  "魔導書",
+  "双剣",
+  "弓"
+];
+
+// エンチャ値（例）
+const enchantValueList = [
+  "1","2","3","4","5","6","7","8","9","10"
+];
+
 // ===== オプション =====
 const optionList = [
   "ダメージ+10%",

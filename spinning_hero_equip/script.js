@@ -14,12 +14,19 @@ function collectData(){
   state.weapons.forEach((_,i)=>{
     data.weapons.push({
       name: getVal(`w_name_${i}`),
-      r: getVal(`w_r_${i}`),
-      b: getVal(`w_b_${i}`),
-      remain: getVal(`w_remain_${i}`),
+
+      r1: getVal(`w_r1_${i}`),
+      r2: getVal(`w_r2_${i}`),
+      rRemain: getVal(`w_r_remain_${i}`),
+
+      b1: getVal(`w_b1_${i}`),
+      b2: getVal(`w_b2_${i}`),
+      bRemain: getVal(`w_b_remain_${i}`),
+
       op1: getVal(`w_op1_${i}`),
       op2: getVal(`w_op2_${i}`),
       op3: getVal(`w_op3_${i}`),
+
       opLv1: getVal(`w_oplv1_${i}`),
       opLv2: getVal(`w_oplv2_${i}`),
       opLv3: getVal(`w_oplv3_${i}`)
@@ -58,6 +65,7 @@ function saveBuild(){
   localStorage.setItem(STORAGE_KEY + name, JSON.stringify(data));
 
   saveStatus.textContent = "保存しました";
+  renderBuildList(); // ←追加
 }
 
 // ===== 読み込み =====
@@ -80,9 +88,15 @@ function loadBuild(){
   // 値反映
   data.weapons.forEach((w,i)=>{
     setVal(`w_name_${i}`,w.name);
-    setVal(`w_r_${i}`,w.r);
-    setVal(`w_b_${i}`,w.b);
-    setVal(`w_remain_${i}`,w.remain);
+
+    setVal(`w_r1_${i}`,w.r1);
+    setVal(`w_r2_${i}`,w.r2);
+    setVal(`w_r_remain_${i}`,w.rRemain);
+
+    setVal(`w_b1_${i}`,w.b1);
+    setVal(`w_b2_${i}`,w.b2);
+    setVal(`w_b_remain_${i}`,w.bRemain);
+
     setVal(`w_op1_${i}`,w.op1);
     setVal(`w_op2_${i}`,w.op2);
     setVal(`w_op3_${i}`,w.op3);
@@ -148,9 +162,13 @@ function loadAuto(){
   setTimeout(()=>{
     data.weapons.forEach((w,i)=>{
       setVal(`w_name_${i}`,w.name);
-      setVal(`w_r_${i}`,w.r);
-      setVal(`w_b_${i}`,w.b);
-      setVal(`w_remain_${i}`,w.remain);
+      setVal(`w_r1_${i}`,w.r1);
+      setVal(`w_r2_${i}`,w.r2);
+      setVal(`w_r_remain_${i}`,w.rRemain);
+
+      setVal(`w_b1_${i}`,w.b1);
+      setVal(`w_b2_${i}`,w.b2);
+      setVal(`w_b_remain_${i}`,w.bRemain);
       setVal(`w_op1_${i}`,w.op1);
       setVal(`w_op2_${i}`,w.op2);
       setVal(`w_op3_${i}`,w.op3);
@@ -183,19 +201,59 @@ let state = {
   sigils: []
 };
 
+// ===== 保存済みビルド一覧取得 =====
+function getBuildList(){
+  const list = [];
+
+  for(let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+
+    if(key.startsWith(STORAGE_KEY)){
+      list.push(key.replace(STORAGE_KEY,""));
+    }
+  }
+
+  return list.sort();
+}
+
 // ===== 初期化 =====
 function init(){
   state.weapons = Array(2).fill({});
   state.accessories = Array(1).fill({});
   state.sigils = Array(2).fill({});
   renderInputs();
-  window.onload = ()=>{
-    init();
-    loadFromURL();   // ← URL優先
-    loadAuto();      // ← なければ自動保存
-  };
 }
 
+// ===== 保存済みビルド一覧表示 =====
+function renderBuildList(){
+  const list = getBuildList();
+
+  let html = "";
+
+  list.forEach(name=>{
+    html += `
+    <div>
+      ${name}
+      <button onclick="loadBuildByName('${name}')">読込</button>
+      <button onclick="deleteBuildByName('${name}')">削除</button>
+    </div>`;
+  });
+
+  document.getElementById("buildList").innerHTML = html;
+}
+
+// ===== 保存済みビルド名前指定ロード処理 =====
+function loadBuildByName(name){
+  document.getElementById("buildName").value = name;
+  loadBuild();
+}
+
+
+// ===== 保存済みビルド名前指定削除時処理 =====
+function deleteBuildByName(name){
+  localStorage.removeItem(STORAGE_KEY + name);
+  renderBuildList();
+}
 
 // ===== プルダウン生成 =====
 function createSelect(list, id){
@@ -217,14 +275,25 @@ function renderInputs(){
     weapons.innerHTML += `
     <div class="card">
       武器${i+1}<br>
-      名前 <input id="w_name_${i}"><br>
-      赤 ${createSelect(enchantRedList,`w_r_${i}`)}
-      青 ${createSelect(enchantBlueList,`w_b_${i}`)}<br>
-      残留 <input id="w_remain_${i}" value="100">%<br>
+
+      武器名 ${createSelect(weaponList,`w_name_${i}`)}<br>
+
+      赤 
+      ${createSelect(enchantRedList,`w_r1_${i}`)}
+      ${createSelect(enchantRedList,`w_r2_${i}`)}
+      残留 <input id="w_r_remain_${i}" value="-" style="width:60px">%<br>
+
+      青 
+      ${createSelect(enchantBlueList,`w_b1_${i}`)}
+      ${createSelect(enchantBlueList,`w_b2_${i}`)}
+      残留 <input id="w_b_remain_${i}" value="-" style="width:60px">%<br>
+
       OP1 ${createSelect(optionList,`w_op1_${i}`)} 
       Lv <input id="w_oplv1_${i}" value="1" style="width:50px"><br>
+
       OP2 ${createSelect(optionList,`w_op2_${i}`)} 
       Lv <input id="w_oplv2_${i}" value="1" style="width:50px"><br>
+
       OP3 ${createSelect(optionList,`w_op3_${i}`)} 
       Lv <input id="w_oplv3_${i}" value="1" style="width:50px">
     </div>`;
@@ -294,13 +363,16 @@ function render(){
     html += `
     <div class="box">
       ■${getVal(`w_name_${i}`)}<br>
-      <span class="small">
-      赤 ${getVal(`w_r_${i}`)} / 青 ${getVal(`w_b_${i}`)}<br>
-      ${getVal(`w_remain_${i}`)}%<br>
+
+      赤 ${getVal(`w_r1_${i}`)} / ${getVal(`w_r2_${i}`)} 
+      (${getVal(`w_r_remain_${i}`)}%)<br>
+
+      青 ${getVal(`w_b1_${i}`)} / ${getVal(`w_b2_${i}`)} 
+      (${getVal(`w_b_remain_${i}`)}%)<br>
+
       ${getVal(`w_op1_${i}`)} Lv${getVal(`w_oplv1_${i}`)}<br>
       ${getVal(`w_op2_${i}`)} Lv${getVal(`w_oplv2_${i}`)}<br>
       ${getVal(`w_op3_${i}`)} Lv${getVal(`w_oplv3_${i}`)}
-      </span>
     </div>`;
   });
 
@@ -400,8 +472,12 @@ function loadFromURL(){
     setTimeout(()=>{
       data.weapons.forEach((w,i)=>{
         setVal(`w_name_${i}`,w.name);
-        setVal(`w_r_${i}`,w.r);
-        setVal(`w_b_${i}`,w.b);
+        setVal(`w_r1_${i}`,w.r1);
+        setVal(`w_r2_${i}`,w.r2);
+        setVal(`w_r_remain_${i}`,w.rRemain);
+        setVal(`w_b1_${i}`,w.b1);
+        setVal(`w_b2_${i}`,w.b2);
+        setVal(`w_b_remain_${i}`,w.bRemain);
         setVal(`w_remain_${i}`,w.remain);
         setVal(`w_op1_${i}`,w.op1);
         setVal(`w_op2_${i}`,w.op2);
@@ -434,5 +510,10 @@ function loadFromURL(){
 }
 
 // ===== 初期化 =====
-window.onload = init;
+window.onload = ()=>{
+  init();
+  loadFromURL();   // ← URL優先
+  loadAuto();      // ← なければ自動保存
+  renderBuildList(); // ←ビルドリスト表示
+};
 
